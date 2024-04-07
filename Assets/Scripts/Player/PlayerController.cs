@@ -1,0 +1,157 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerController : MonoBehaviour
+{
+    private PlayerInputControl inputControl;
+    private Rigidbody2D rb;
+    private SpriteRenderer sr;
+    private PhysicCheck physicCheck;
+    private CapsuleCollider2D capsuleCollider;
+
+    private Vector2 colliderSize;
+    private Vector2 colliderOffset;
+    private Vector2 Direction;
+    public float moveSpeed;
+    public float jumpForce;
+/*    public float accelerateValue;*/       ///run and walk «–ªª÷µ
+    private float gravity;
+
+    public bool isCrouch;
+    public bool isJump;
+    public bool isDead;
+    public bool isHurt;
+
+    public float hurtForce;
+
+    private void Awake()
+    {
+        inputControl = new PlayerInputControl();
+        rb = this.GetComponent<Rigidbody2D>();
+        sr = this.GetComponent<SpriteRenderer>();
+        physicCheck = this.GetComponent<PhysicCheck>();
+        capsuleCollider = this.GetComponent<CapsuleCollider2D>();
+
+        gravity = rb.gravityScale;
+        colliderSize = capsuleCollider.size;
+        colliderOffset = capsuleCollider.offset;
+/*        accelerateValue = 0.5f;*/
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        inputControl.GamePlay.Jump.started += StartJump;
+        inputControl.GamePlay.Jump.canceled += CamcelJump;
+        
+/*   run and walk «–ªª     inputControl.GamePlay.Shift.started += Accelerate;
+        inputControl.GamePlay.Shift.canceled += Accelerate;*/
+    }
+
+    
+
+    private void OnEnable()
+    {
+        inputControl.Enable();
+    }
+
+
+
+    // Update is called once per frame
+    void Update()
+    {
+        ReadInput();
+        Crouch();
+    }
+
+    private void FixedUpdate()
+    {
+        if(!isHurt) Move();
+        FlipCharacter();
+    }
+
+    private void ReadInput()
+    {
+        Direction = inputControl.GamePlay.Move.ReadValue<Vector2>();
+
+    }
+
+    private void Crouch()
+    {
+        if(!physicCheck.CheckOverhead())
+        {
+            isCrouch = Direction.y < 0;
+            if (isCrouch && physicCheck.GroundCheck())
+            {
+                capsuleCollider.size = new Vector2(colliderSize.x, colliderSize.y * 0.5f);
+                capsuleCollider.offset = new Vector2(colliderOffset.x, colliderOffset.y * 0.5f);
+            }
+            else
+            {
+                capsuleCollider.size = colliderSize;
+                capsuleCollider.offset = colliderOffset;
+            }
+        }
+    }
+
+    private void Move()
+    {
+        rb.velocity = new Vector2(Direction.x * moveSpeed * Time.deltaTime /** accelerateValue*/, rb.velocity.y);
+    }
+
+    private void StartJump(InputAction.CallbackContext context)
+    {
+        isJump = true;
+        if (physicCheck.isGround) rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+        rb.gravityScale = rb.velocity.y <= 0.0f ? gravity * 3.0f : gravity;
+        rb.gravityScale = physicCheck.isGround ? gravity : rb.gravityScale;
+    }
+
+    private void CamcelJump(InputAction.CallbackContext context)
+    {
+        isJump = false;
+    }
+
+    private void FlipCharacter()
+    {
+        if (rb.velocity.x < 0.0f) sr.flipX = true;
+        else if (rb.velocity.x > 0.0f) sr.flipX = false;
+    }
+
+    public void GetHurt(Transform attack)
+    {
+        isHurt = true;
+        rb.velocity = Vector2.zero;
+        Vector2 dir = new Vector2((this.transform.position.x - attack.position.x), 0).normalized;   //πÈ“ªªØ
+        rb.AddForce(dir * hurtForce, ForceMode2D.Impulse);
+    }
+
+    public void GetDead()
+    {
+        isDead = true;
+        inputControl.GamePlay.Disable();
+    }
+
+    /// <summary>
+    /// run and walk «–ªª
+    /// </summary>
+/*    private void Accelerate(InputAction.CallbackContext context)
+    {
+        if(context.started)
+        {
+            accelerateValue *= 2.0f;
+        }
+        if (context.canceled)
+        {
+            accelerateValue = 0.5f;
+        }
+    }*/
+
+    private void OnDisable()
+    {
+        inputControl.Disable();
+    }
+}
