@@ -11,7 +11,9 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer sr;
     private PhysicCheck physicCheck;
     private CapsuleCollider2D capsuleCollider;
+    private PlayerAnimation playerAnimation;
 
+    [Header("基本参数")]
     private Vector2 colliderSize;
     private Vector2 colliderOffset;
     private Vector2 Direction;
@@ -19,11 +21,15 @@ public class PlayerController : MonoBehaviour
     public float jumpForce;
 /*    public float accelerateValue;*/       ///run and walk 切换值
     private float gravity;
+    public PhysicsMaterial2D nomal;
+    public PhysicsMaterial2D wall;
 
+    [Header("条件参数")]
     public bool isCrouch;
     public bool isJump;
     public bool isDead;
     public bool isHurt;
+    public bool isAttack;
 
     public float hurtForce;
 
@@ -34,6 +40,7 @@ public class PlayerController : MonoBehaviour
         sr = this.GetComponent<SpriteRenderer>();
         physicCheck = this.GetComponent<PhysicCheck>();
         capsuleCollider = this.GetComponent<CapsuleCollider2D>();
+        playerAnimation = this.GetComponent<PlayerAnimation>();
 
         gravity = rb.gravityScale;
         colliderSize = capsuleCollider.size;
@@ -46,6 +53,7 @@ public class PlayerController : MonoBehaviour
     {
         inputControl.GamePlay.Jump.started += StartJump;
         inputControl.GamePlay.Jump.canceled += CamcelJump;
+        inputControl.GamePlay.Attack.started += PlayerAttack;
         
 /*   run and walk 切换     inputControl.GamePlay.Shift.started += Accelerate;
         inputControl.GamePlay.Shift.canceled += Accelerate;*/
@@ -65,14 +73,17 @@ public class PlayerController : MonoBehaviour
     {
         ReadInput();
         Crouch();
+        CheckMaterial();
     }
 
     private void FixedUpdate()
     {
-        if(!isHurt) Move();
-        FlipCharacter();
+        if (!isHurt && !isAttack)
+        {
+            Move();
+            FlipCharacter();
+        }
     }
-
     private void ReadInput()
     {
         Direction = inputControl.GamePlay.Move.ReadValue<Vector2>();
@@ -135,6 +146,16 @@ public class PlayerController : MonoBehaviour
         inputControl.GamePlay.Disable();
     }
 
+    private void PlayerAttack(InputAction.CallbackContext context)
+    {
+         isAttack = true;
+        playerAnimation.SetAttackAnim();
+    }
+
+    public void CheckMaterial()
+    {
+        capsuleCollider.sharedMaterial = physicCheck.isGround ? nomal : wall;
+    }
     /// <summary>
     /// run and walk 切换
     /// </summary>

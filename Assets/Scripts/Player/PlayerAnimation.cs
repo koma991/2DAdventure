@@ -33,10 +33,16 @@ public class PlayerAnimation : MonoBehaviour
         anim.SetBool("isOverhead",physicCheck.CheckOverhead());
         anim.SetBool("isJump",playerController.isJump);
         anim.SetBool("isDead", playerController.isDead);
+        anim.SetBool("isAttack", playerController.isAttack);
     }
 
     public void SetHurtAnim()
     {
         anim.SetTrigger("Hurt");
+    }
+
+    public void SetAttackAnim()
+    {
+        anim.SetTrigger("attack");
     }
 }
