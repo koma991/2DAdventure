@@ -8,7 +8,6 @@ public class PlayerController : MonoBehaviour
 {
     private PlayerInputControl inputControl;
     private Rigidbody2D rb;
-    private SpriteRenderer sr;
     private PhysicCheck physicCheck;
     private CapsuleCollider2D capsuleCollider;
     private PlayerAnimation playerAnimation;
@@ -37,7 +36,6 @@ public class PlayerController : MonoBehaviour
     {
         inputControl = new PlayerInputControl();
         rb = this.GetComponent<Rigidbody2D>();
-        sr = this.GetComponent<SpriteRenderer>();
         physicCheck = this.GetComponent<PhysicCheck>();
         capsuleCollider = this.GetComponent<CapsuleCollider2D>();
         playerAnimation = this.GetComponent<PlayerAnimation>();
@@ -92,19 +90,16 @@ public class PlayerController : MonoBehaviour
 
     private void Crouch()
     {
-        if(!physicCheck.CheckOverhead())
+        isCrouch = Direction.y < 0;
+        if (isCrouch && physicCheck.isGround)
         {
-            isCrouch = Direction.y < 0;
-            if (isCrouch && physicCheck.GroundCheck())
-            {
-                capsuleCollider.size = new Vector2(colliderSize.x, colliderSize.y * 0.5f);
-                capsuleCollider.offset = new Vector2(colliderOffset.x, colliderOffset.y * 0.5f);
-            }
-            else
-            {
-                capsuleCollider.size = colliderSize;
-                capsuleCollider.offset = colliderOffset;
-            }
+            capsuleCollider.size = new Vector2(colliderSize.x, colliderSize.y * 0.5f);
+            capsuleCollider.offset = new Vector2(colliderOffset.x, colliderOffset.y * 0.5f);
+        }
+        else
+        {
+            capsuleCollider.size = colliderSize;
+            capsuleCollider.offset = colliderOffset;
         }
     }
 
@@ -128,8 +123,8 @@ public class PlayerController : MonoBehaviour
 
     private void FlipCharacter()
     {
-        if (rb.velocity.x < 0.0f) sr.flipX = true;
-        else if (rb.velocity.x > 0.0f) sr.flipX = false;
+        if (rb.velocity.x < 0.0f) transform.localScale = new Vector3(-1, 1,1);
+        else if (rb.velocity.x > 0.0f) transform.localScale = new Vector3(1,1,1);
     }
 
     public void GetHurt(Transform attack)

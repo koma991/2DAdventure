@@ -1,51 +1,58 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PhysicCheck : MonoBehaviour
 {
 
+    private CapsuleCollider2D coll;
+
+    [Header("基础条件")]
     public bool isGround;
-    public bool isOverhead;
+    public bool isWallLeft;
+    public bool isWallRight;
+    public bool auto;
 
-    public Transform checkPoint;
+    [Header("基础参数")]
     public float checkRadius;
-
     public LayerMask groundLayer;
-    public float checkLenght;
     public Vector2 bottomOffset;
-    public Vector2 startPos;
-
+    public Vector2 leftOffset;
+    public Vector2 rightOffset;
 
     private void Awake()
     {
-        checkPoint = GameObject.Find("CheckPoint").transform;
+        coll = GetComponent<CapsuleCollider2D>();
+        if (auto)
+        {
+            rightOffset = new Vector2((coll.bounds.size.x + coll.offset.x) / 2, coll.bounds.size.y / 2);
+            leftOffset = new Vector2(-rightOffset.x, rightOffset.y);
+        }
     }
-
 
     // Update is called once per frame
     void Update()
     {
         GroundCheck();
+        WallCheck();
     }
 
-    public bool GroundCheck()
+    public void GroundCheck()
     {
-        isGround = Physics2D.Raycast((Vector2)this.transform.position + bottomOffset, Vector2.down, checkLenght, groundLayer);
-        return isGround;
+        isGround = Physics2D.OverlapCircle((Vector2)transform.position + bottomOffset,checkRadius,groundLayer);
     }
 
-    public bool CheckOverhead()
+    public void WallCheck()
     {
-        isOverhead = Physics2D.OverlapCircle(checkPoint.position, checkRadius, groundLayer);
-        return isOverhead;
+        isWallLeft = Physics2D.OverlapCircle((Vector2)transform.position + leftOffset, checkRadius, groundLayer);
+        isWallRight = Physics2D.OverlapCircle((Vector2)transform.position + rightOffset, checkRadius, groundLayer);
     }
-
 
     private void OnDrawGizmosSelected()
     {
-        startPos = (Vector2)this.transform.position + bottomOffset;
-        Gizmos.DrawLine(startPos, startPos + Vector2.down * checkLenght);
-        Gizmos.DrawSphere(checkPoint.position + (Vector3)bottomOffset, checkRadius);
+        Gizmos.DrawSphere((Vector2)transform.position + bottomOffset, checkRadius);
+        Gizmos.DrawSphere((Vector2)transform.position + leftOffset, checkRadius);
+        Gizmos.DrawSphere((Vector2)transform.position + rightOffset, checkRadius);
     }
 }

@@ -8,78 +8,61 @@ public class Enemy : MonoBehaviour
     public float normalSpeed;
     public float currentSpeed;
     public float pursueSpeed;
-    public Vector3 facedir;
-    public Vector2 offset;
-    public float checkLenght;
-    public LayerMask wallLayer;
-    public float timerDuration;
-    public float timerCount;
+    public Vector3 faceDir;
+    public float waitTime;
+    public float waitCount;
 
-
-    public bool isWall;
+    [Header("»ù´¡ÅÐ¶Ï")]
+    public bool wait;
 
     protected Rigidbody2D rb;
     protected Animator anim;
-    protected SpriteRenderer sr;
+    protected PhysicCheck physicCheck;
 
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        sr = GetComponent<SpriteRenderer>();
+        physicCheck = GetComponent<PhysicCheck>();
 
         currentSpeed = normalSpeed;
-    }
-
-    private void Start()
-    {
-        facedir = new Vector3(-this.transform.localScale.x, 0, 0);
-        timerCount = timerDuration;
+        waitCount = waitTime;
+        wait = false;
     }
 
     private void Update()
     {
-        if (isWall) timerCount -= Time.deltaTime;
-        CheckWall();
+        faceDir = new Vector3(-this.transform.localScale.x, 0, 0);
+        if((physicCheck.isWallLeft && faceDir.x < 0) || (physicCheck.isWallRight && faceDir.x > 0))
+        {
+            wait = true;
+            anim.SetBool("walk", false);
+        }
+        TimeCounter();
+    }
+
+    private void FixedUpdate()
+    {
+        Move();
     }
 
     public virtual void Move()
     {
-        if (isWall)
-        {
-            rb.velocity = Vector2.zero;
-            anim.SetBool("walk", false);
-            return;
-        }
-        rb.velocity = new Vector2(currentSpeed * facedir.x * Time.deltaTime,rb.velocity.y);
+        rb.velocity = new Vector2(currentSpeed * faceDir.x * Time.deltaTime,rb.velocity.y);
     }
 
-    public void CheckWall()
+    public void TimeCounter()
     {
-        if (Physics2D.Raycast((Vector2)this.transform.position + offset, Vector2.left, checkLenght, wallLayer))
+        if (wait)
         {
-            isWall = true;
-            if (timerCount <= 0.0f)
+            waitCount -= Time.deltaTime;
+            if (waitCount <= 0)
             {
-                facedir = -facedir;
-                FlipCharacter();
-                offset.x = facedir.x > 0 ? Mathf.Abs(offset.x) : -offset.x;
-                isWall = false;
-                timerCount = timerDuration;
+                wait = false;
+                waitCount = waitTime;
+                transform.localScale = new Vector3(faceDir.x, 1, 1);
             }
         }
-    }
-
-    private void FlipCharacter()
-    {
-        if (facedir.x > 0.0f) sr.flipX = true;
-        else if (facedir.x < 0.0f) sr.flipX = false;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Vector2 startPos = (Vector2)this.transform.position + offset;
-        Gizmos.DrawLine(startPos, startPos + Vector2.left * checkLenght);
     }
 }

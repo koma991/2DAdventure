@@ -13,6 +13,6 @@ public class Boarl : Enemy
     public override void Move()
     {
         base.Move();
-        if(!isWall) anim.SetBool("walk", true);
+        anim.SetBool("walk", true);
     }
 }
