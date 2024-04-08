@@ -9,15 +9,19 @@ public class Enemy : MonoBehaviour
     public float currentSpeed;
     public float pursueSpeed;
     public Vector3 faceDir;
+    public float hurtForce;
+
+    public Transform attack;
+    [Header("¼ÆÊ±Æ÷")]
+    public bool wait;
     public float waitTime;
     public float waitCount;
-
-    [Header("»ù´¡ÅÐ¶Ï")]
-    public bool wait;
 
     protected Rigidbody2D rb;
     protected Animator anim;
     protected PhysicCheck physicCheck;
+
+
 
 
     private void Awake()
@@ -64,5 +68,15 @@ public class Enemy : MonoBehaviour
                 transform.localScale = new Vector3(faceDir.x, 1, 1);
             }
         }
+    }
+
+    public void TakeHurt(Transform attackTf)
+    {
+        attack = attackTf.transform;
+        if((transform.position.x - attack.position.x) > 0) transform.localScale = new Vector3(1, 1, 1);
+        if ((transform.position.x - attack.position.x) < 0) transform.localScale = new Vector3(-1, 1, 1);
+        Vector2 dir = new Vector2(this.transform.position.x - attack.position.x, 0).normalized;
+        rb.AddForce(dir * hurtForce,ForceMode2D.Impulse);
+        anim.SetTrigger("hurt");
     }
 }

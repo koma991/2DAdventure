@@ -9,12 +9,14 @@ public class Character : MonoBehaviour
     public int currentHealth;
     public int maxHealth;
 
+    [Header("¼ÆÊ±Æ÷")]
     public float invulnerableDuration;
     private float invulnerableCounter;
     public bool invulnerable;
 
     public UnityEvent<Transform> OnTakeDamage;
     public UnityEvent OnDead;
+
 
     private void Awake()
     {
