@@ -35,8 +35,6 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
 
-        Application.targetFrameRate = 50;
-
         inputControl = new PlayerInputControl();
         rb = this.GetComponent<Rigidbody2D>();
         physicCheck = this.GetComponent<PhysicCheck>();

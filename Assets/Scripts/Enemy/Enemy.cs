@@ -5,29 +5,37 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [Header("基础参数")]
-    public float normalSpeed;
+    [HideInInspector] public float normalSpeed;
     public float currentSpeed;
     public float pursueSpeed;
-    public Vector3 faceDir;
+    [HideInInspector] public Vector3 faceDir;
     public float hurtForce;
-    public Vector2 dir;
 
-    public Transform attack;
+    [HideInInspector] public Transform attack;
     [Header("计时器")]
     public bool wait;
     public float waitTime;
     public float waitCount;
 
-    protected Rigidbody2D rb;
-    protected Animator anim;
-    protected PhysicCheck physicCheck;
+    [HideInInspector] protected Rigidbody2D rb;
+    [HideInInspector] public Animator anim;
+    [HideInInspector] public PhysicCheck physicCheck;
 
     [Header("条件")]
     public bool isHurt;
     public bool isDie;
 
+    protected BaseState currentState;
+    protected BaseState patrolState;
+    protected BaseState chaseState;
 
-    private void Awake()
+    private void OnEnable()
+    {
+        currentState = patrolState;
+        currentState.OnEnter(this);
+    }
+
+    protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -41,17 +49,15 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         faceDir = new Vector3(-this.transform.localScale.x, 0, 0);
-        if((physicCheck.isWallLeft && faceDir.x < 0) || (physicCheck.isWallRight && faceDir.x > 0))
-        {
-            wait = true;
-            anim.SetBool("walk", false);
-        }
+        currentState.LogicUpdate();
         TimeCounter();
     }
 
     private void FixedUpdate()
     {
-        if(!isHurt & !isDie) Move();
+        if(!isHurt && !isDie &&!wait) Move();
+
+        currentState.PhysicUpdate();
     }
 
     public virtual void Move()
@@ -82,14 +88,13 @@ public class Enemy : MonoBehaviour
 
         isHurt = true;
         anim.SetTrigger("hurt");
-        dir = new Vector2(this.transform.position.x - attackTf.position.x, 0).normalized;
-        StartCoroutine(OnHurt());
+        Vector2 dir = new Vector2(this.transform.position.x - attackTf.position.x, 0).normalized;
+        StartCoroutine(OnHurt(dir));
     }
 
-    public IEnumerator OnHurt()
+    public IEnumerator OnHurt(Vector2 dir)
     {
         rb.AddForce(dir * hurtForce, ForceMode2D.Impulse);
-        Debug.Log(rb.velocity.x);
         yield return new WaitForSeconds(0.5f);
         isHurt = false;
     }
