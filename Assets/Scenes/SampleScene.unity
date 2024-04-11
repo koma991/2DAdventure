@@ -690,9 +690,9 @@ GameObject:
   - component: {fileID: 715747311}
   - component: {fileID: 715747312}
   - component: {fileID: 715747313}
-  - component: {fileID: 715747315}
-  - component: {fileID: 715747314}
   - component: {fileID: 715747316}
+  - component: {fileID: 715747315}
+  - component: {fileID: 715747319}
   - component: {fileID: 715747317}
   - component: {fileID: 715747318}
   m_Layer: 8
@@ -763,7 +763,7 @@ Transform:
   m_GameObject: {fileID: 715747308}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.83, y: -3.46, z: 0}
+  m_LocalPosition: {x: 2, y: -3.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -876,40 +876,6 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &715747314
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 715747308}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dcf88f3abfa0de04c8ac08d04e70cc1c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentHealth: 0
-  maxHealth: 50
-  invulnerableDuration: 1
-  invulnerable: 0
-  OnTakeDamage:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 715747317}
-        m_TargetAssemblyTypeName: Enemy, Assembly-CSharp
-        m_MethodName: TakeHurt
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  OnDead:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &715747315
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -957,14 +923,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff98bb7017d2b0d4e94a49c8932ec739, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalSpeed: 100
+  normalSpeed: 180
   currentSpeed: 0
-  pursueSpeed: 180
+  pursueSpeed: 240
   faceDir: {x: 0, y: 0, z: 0}
-  hurtForce: 0
+  hurtForce: 4.5
+  dir: {x: 0, y: 0}
+  attack: {fileID: 0}
   wait: 0
   waitTime: 1
   waitCount: 0
+  isHurt: 0
+  isDie: 0
 --- !u!114 &715747318
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -988,6 +958,52 @@ MonoBehaviour:
   bottomOffset: {x: 0, y: 0}
   leftOffset: {x: 0, y: 0}
   rightOffset: {x: 0, y: 0}
+--- !u!114 &715747319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715747308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcf88f3abfa0de04c8ac08d04e70cc1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentHealth: 0
+  maxHealth: 30
+  invulnerableDuration: 1
+  invulnerable: 0
+  OnTakeDamage:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 715747317}
+        m_TargetAssemblyTypeName: Enemy, Assembly-CSharp
+        m_MethodName: OnTakeDamage
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnDead:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 715747317}
+        m_TargetAssemblyTypeName: Enemy, Assembly-CSharp
+        m_MethodName: OnDead
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &907490059
 GameObject:
   m_ObjectHideFlags: 0
@@ -1556,7 +1572,7 @@ Transform:
   m_GameObject: {fileID: 1417134647}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.65, y: 1.18, z: 0}
+  m_LocalPosition: {x: -4.54, y: -3.77, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1613,7 +1629,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 4
+  m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -1637,8 +1653,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 512d014d9d0f4074aa016f152d9133b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 200
-  jumpForce: 16.5
+  moveSpeed: 260
+  jumpForce: 16
+  fullMultiplier: 2.5
   nomal: {fileID: 6200000, guid: eca0959d8791c0649b3e7529e9b06fff, type: 2}
   wall: {fileID: 6200000, guid: cb4e826978aed46439c226739c37dba2, type: 2}
   isCrouch: 0
@@ -1731,7 +1748,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentHealth: 0
   maxHealth: 20
-  invulnerableDuration: 2
+  invulnerableDuration: 20
   invulnerable: 0
   OnTakeDamage:
     m_PersistentCalls:

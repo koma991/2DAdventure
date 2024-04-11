@@ -10,6 +10,7 @@ public class Enemy : MonoBehaviour
     public float pursueSpeed;
     public Vector3 faceDir;
     public float hurtForce;
+    public Vector2 dir;
 
     public Transform attack;
     [Header("计时器")]
@@ -21,7 +22,9 @@ public class Enemy : MonoBehaviour
     protected Animator anim;
     protected PhysicCheck physicCheck;
 
-
+    [Header("条件")]
+    public bool isHurt;
+    public bool isDie;
 
 
     private void Awake()
@@ -48,7 +51,7 @@ public class Enemy : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Move();
+        if(!isHurt & !isDie) Move();
     }
 
     public virtual void Move()
@@ -70,13 +73,36 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void TakeHurt(Transform attackTf)
+    public void OnTakeDamage(Transform attackTf)
     {
-        attack = attackTf.transform;
+        attack = attackTf;
+        //判断玩家在敌人的方向
         if((transform.position.x - attack.position.x) > 0) transform.localScale = new Vector3(1, 1, 1);
         if ((transform.position.x - attack.position.x) < 0) transform.localScale = new Vector3(-1, 1, 1);
-        Vector2 dir = new Vector2(this.transform.position.x - attack.position.x, 0).normalized;
-        rb.AddForce(dir * hurtForce,ForceMode2D.Impulse);
+
+        isHurt = true;
         anim.SetTrigger("hurt");
+        dir = new Vector2(this.transform.position.x - attackTf.position.x, 0).normalized;
+        StartCoroutine(OnHurt());
+    }
+
+    public IEnumerator OnHurt()
+    {
+        rb.AddForce(dir * hurtForce, ForceMode2D.Impulse);
+        Debug.Log(rb.velocity.x);
+        yield return new WaitForSeconds(0.5f);
+        isHurt = false;
+    }
+
+    public void OnDead()
+    {
+        anim.SetBool("dead", true);
+        this.gameObject.layer = 2;
+        isDie = true;
+    }
+
+    public void DestoryAfterAnimation()
+    {
+        Destroy(this.gameObject);
     }
 }

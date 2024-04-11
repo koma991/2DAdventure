@@ -18,8 +18,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 Direction;
     public float moveSpeed;
     public float jumpForce;
+    public float fullMultiplier;
 /*    public float accelerateValue;*/       ///run and walk ÇÐ»»Öµ
-    private float gravity;
     public PhysicsMaterial2D nomal;
     public PhysicsMaterial2D wall;
 
@@ -34,13 +34,16 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+
+        Application.targetFrameRate = 50;
+
         inputControl = new PlayerInputControl();
         rb = this.GetComponent<Rigidbody2D>();
         physicCheck = this.GetComponent<PhysicCheck>();
         capsuleCollider = this.GetComponent<CapsuleCollider2D>();
         playerAnimation = this.GetComponent<PlayerAnimation>();
+        Physics2D.gravity = new Vector2(Physics2D.gravity.x, Physics2D.gravity.y * 4);
 
-        gravity = rb.gravityScale;
         colliderSize = capsuleCollider.size;
         colliderOffset = capsuleCollider.offset;
 /*        accelerateValue = 0.5f;*/
@@ -81,6 +84,9 @@ public class PlayerController : MonoBehaviour
             Move();
             FlipCharacter();
         }
+
+        if (rb.velocity.y < 0)
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (fullMultiplier - 1) * Time.deltaTime;
     }
     private void ReadInput()
     {
@@ -111,9 +117,7 @@ public class PlayerController : MonoBehaviour
     private void StartJump(InputAction.CallbackContext context)
     {
         isJump = true;
-        if (physicCheck.isGround) rb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
-        rb.gravityScale = rb.velocity.y <= 0.0f ? gravity * 3.0f : gravity;
-        rb.gravityScale = physicCheck.isGround ? gravity : rb.gravityScale;
+        if (physicCheck.isGround) rb.AddForce(transform.up * jumpForce,ForceMode2D.Impulse);
     }
 
     private void CamcelJump(InputAction.CallbackContext context)
@@ -143,7 +147,7 @@ public class PlayerController : MonoBehaviour
 
     private void PlayerAttack(InputAction.CallbackContext context)
     {
-         isAttack = true;
+        isAttack = true;
         playerAnimation.SetAttackAnim();
     }
 
