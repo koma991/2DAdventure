@@ -40,7 +40,7 @@ public class PhysicCheck : MonoBehaviour
 
     public void GroundCheck()
     {
-        isGround = Physics2D.OverlapCircle((Vector2)transform.position + bottomOffset,checkRadius,groundLayer);
+        isGround = Physics2D.OverlapCircle((Vector2)transform.position + bottomOffset * transform.localScale,checkRadius,groundLayer);
     }
 
     public void WallCheck()
@@ -51,8 +51,8 @@ public class PhysicCheck : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.DrawSphere((Vector2)transform.position + bottomOffset, checkRadius);
-        Gizmos.DrawSphere((Vector2)transform.position + leftOffset, checkRadius);
-        Gizmos.DrawSphere((Vector2)transform.position + rightOffset, checkRadius);
+        Gizmos.DrawSphere((Vector2)transform.position + bottomOffset * transform.localScale, checkRadius);
+/*        Gizmos.DrawSphere((Vector2)transform.position + leftOffset, checkRadius);
+        Gizmos.DrawSphere((Vector2)transform.position + rightOffset, checkRadius);*/
     }
 }
