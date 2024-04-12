@@ -8,5 +8,6 @@ public class Boarl : Enemy
     {
         base.Awake();
         patrolState = new BoarlPatrolState();
+        chaseState = new BoarlChaseState();
     }
 }

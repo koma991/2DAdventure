@@ -10,12 +10,20 @@ public class Enemy : MonoBehaviour
     public float pursueSpeed;
     [HideInInspector] public Vector3 faceDir;
     public float hurtForce;
+    public Vector2 centerOffset;
+    public LayerMask playerLayer;
+    public Vector2 checkSize;
+    public float checkDistance;
+
 
     [HideInInspector] public Transform attack;
     [Header("¼ÆÊ±Æ÷")]
     public bool wait;
     public float waitTime;
     public float waitCount;
+
+    public float lostTime;
+    public float LostCurrentTime;
 
     [HideInInspector] protected Rigidbody2D rb;
     [HideInInspector] public Animator anim;
@@ -51,6 +59,7 @@ public class Enemy : MonoBehaviour
         faceDir = new Vector3(-this.transform.localScale.x, 0, 0);
         currentState.LogicUpdate();
         TimeCounter();
+
     }
 
     private void FixedUpdate()
@@ -77,6 +86,14 @@ public class Enemy : MonoBehaviour
                 transform.localScale = new Vector3(faceDir.x, 1, 1);
             }
         }
+
+        if (!FoundPlayer() && LostCurrentTime > 0)
+        {
+            LostCurrentTime -= Time.deltaTime;
+        }else if (FoundPlayer())
+        {
+            LostCurrentTime = lostTime;
+        }
     }
 
     public void OnTakeDamage(Transform attackTf)
@@ -89,7 +106,26 @@ public class Enemy : MonoBehaviour
         isHurt = true;
         anim.SetTrigger("hurt");
         Vector2 dir = new Vector2(this.transform.position.x - attackTf.position.x, 0).normalized;
+        rb.velocity = new Vector2(0, rb.velocity.y);
         StartCoroutine(OnHurt(dir));
+    }
+
+    public bool FoundPlayer()
+    {
+        return Physics2D.BoxCast((transform.position + (Vector3)centerOffset), checkSize, 0, faceDir, checkDistance,playerLayer);
+    }
+
+    public void SwitchState(NPCState state)
+    {
+        var newState = state switch
+        {
+            NPCState.Patrol => patrolState,
+            NPCState.Chaase => chaseState,
+            _ => null
+        };
+        currentState.OnEnd();
+        currentState = newState;
+        currentState.OnEnter(this);
     }
 
     public IEnumerator OnHurt(Vector2 dir)
@@ -109,5 +145,15 @@ public class Enemy : MonoBehaviour
     public void DestoryAfterAnimation()
     {
         Destroy(this.gameObject);
+    }
+
+    private void OnDisable()
+    {
+        currentState.OnEnd();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(transform.position + (Vector3)centerOffset + new Vector3(checkDistance *-transform.localScale.x,0,0),0.2f);
     }
 }
